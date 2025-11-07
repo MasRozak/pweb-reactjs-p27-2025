@@ -1,53 +1,45 @@
 // src/App.tsx
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/navbar';
+import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/protectedRoute';
 
-// Import halaman-halaman
-import LoginPage from './pages/authPages/loginPage';
+// Import halaman Auth
+import LoginPage from './pages/authPages/loginPageSimple';
 import RegisterPage from './pages/authPages/registerPage';
 
-// Halaman-halaman ini akan dibuat oleh tim lain, 
-// tapi kita buat placeholder-nya
-const BooksList = () => <div>Halaman Daftar Buku (Protected)</div>;
-const BookDetail = () => <div>Halaman Detail Buku (Protected)</div>;
-const AddBook = () => <div>Halaman Tambah Buku (Protected)</div>;
-const TransactionsList = () => <div>Halaman Transaksi (Protected)</div>;
-const TransactionDetail = () => <div>Halaman Detail Transaksi (Protected)</div>;
+// Import halaman Books
+import BookList from './pages/bookPages/bookList';
+import DetailBook from './pages/bookPages/detailBook';
+import AddBook from './pages/bookPages/addBook';
+import TestAPI from './pages/bookPages/testAPI';
+
+// Import halaman Transactions
+// import ListTransactions from './pages/transactionPages/listTransactions';
+// import DetailTransaction from './pages/transactionPages/detailTransaction';
+// import CreateTransaction from './pages/transactionPages/createTransaction';
 
 const App = () => {
   return (
     <div className="app-container">
-      {/* Navbar akan tampil di semua halaman */}
-      <Navbar />
-      
-      <main className="max-w-screen-xl mx-auto p-4">
-        <Routes>
-          {/* Rute Publik */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+      <Routes>
+        {/* Rute Publik */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/test-api" element={<TestAPI />} />
 
-          {/* Rute Terproteksi */}
-          {/* Task: pastikan semua rute protected menggunakan component ini */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/books" element={<BooksList />} />
-            <Route path="/books/add" element={<AddBook />} />
-            <Route path="/books/:id" element={<BookDetail />} />
-            <Route path="/transactions" element={<TransactionsList />} />
-            <Route path="/transactions/:id" element={<TransactionDetail />} />
-          </Route>
+        {/* Rute Terproteksi */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<BookList />} />
+          <Route path="/books" element={<BookList />} />
+          <Route path="/books/add" element={<AddBook />} />
+          <Route path="/books/:id" element={<DetailBook />} />
+          {/* <Route path="/transactions" element={<ListTransactions />} /> */}
+          {/* <Route path="/transactions/:id" element={<DetailTransaction />} /> */}
+          {/* <Route path="/transactions/add" element={<CreateTransaction />} /> */}
+        </Route>
 
-          {/* Redirect halaman root (/) ke /books jika sudah login, atau /login jika belum */}
-          <Route 
-            path="/" 
-            element={<Navigate to="/books" replace />} 
-          />
-
-          {/* Halaman 404 (Opsional tapi bagus) */}
-          <Route path="*" element={<div>404 - Halaman tidak ditemukan</div>} />
-        </Routes>
-      </main>
+        {/* Halaman 404 */}
+        <Route path="*" element={<div className="p-8 text-center">404 - Halaman tidak ditemukan</div>} />
+      </Routes>
     </div>
   );
 };

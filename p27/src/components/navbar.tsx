@@ -25,7 +25,7 @@ const Navbar = () => {
           Books
         </NavLink>
       </li>
-      <li>
+      {/* <li>
         <NavLink
           to="/transactions"
           className={({ isActive }) => 
@@ -36,6 +36,17 @@ const Navbar = () => {
           Transactions
         </NavLink>
       </li>
+      <li>
+        <NavLink
+          to="/test-api"
+          className={({ isActive }) => 
+            `block py-2 px-3 rounded ${isActive ? activeClassName : defaultClassName}`
+          }
+          onClick={() => isMobile && setIsMobileMenuOpen(false)}
+        >
+          Test API
+        </NavLink>
+      </li> */}
     </>
   );
 
