@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getToken } from '../utils/token'; // (Kamu akan buat file ini)
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/transaction/:id', // <-- GANTI INI
+  baseURL: 'http://localhost:8080',
   timeout: 10000,
 });
 

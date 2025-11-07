@@ -474,6 +474,493 @@ baseURL: 'http://API-BACKEND-KAMU.com/api/v1', // <-- GANTI INI
 
 ---
 
+## 🔌 Cara Memanggil API
+
+Semua API function sudah tersedia di folder `src/api/`. Berikut cara menggunakannya:
+
+### **Import API Functions**
+
+```typescript
+// Import dari central index (recommended)
+import { login, getBooks, createTransaction } from '@/api';
+
+// Atau import langsung dari file spesifik
+import { login, register, getCurrentUser } from '@/api/auth';
+import { getBooks, createBook, deleteBook } from '@/api/books';
+import { getGenres } from '@/api/genres';
+import { createTransaction, getTransactions } from '@/api/transactions';
+```
+
+### **1. Authentication APIs** (`src/api/auth.ts`)
+
+#### **Register**
+```typescript
+import { register } from '@/api/auth';
+import { saveToken } from '@/utils/token';
+
+const handleRegister = async () => {
+  try {
+    const response = await register({
+      username: 'John Doe', // optional
+      email: 'john@example.com',
+      password: 'Password123'
+    });
+    console.log(response.data); // { id, email, created_at }
+    // Redirect ke login page
+  } catch (error) {
+    console.error('Register failed:', error);
+  }
+};
+```
+
+#### **Login**
+```typescript
+import { login } from '@/api/auth';
+import { saveToken } from '@/utils/token';
+
+const handleLogin = async () => {
+  try {
+    const response = await login({
+      email: 'john@example.com',
+      password: 'Password123'
+    });
+    
+    // Simpan token ke localStorage
+    saveToken(response.data.access_token);
+    
+    // Redirect ke /books atau update AuthContext
+  } catch (error) {
+    console.error('Login failed:', error);
+  }
+};
+```
+
+#### **Get Current User**
+```typescript
+import { getCurrentUser } from '@/api/auth';
+
+const fetchCurrentUser = async () => {
+  try {
+    const response = await getCurrentUser();
+    console.log(response.data); // { id, username, email }
+  } catch (error) {
+    console.error('Failed to get user:', error);
+  }
+};
+```
+
+---
+
+### **2. Books APIs** (`src/api/books.ts`)
+
+#### **Get All Books (dengan filter, search, sort, pagination)**
+```typescript
+import { getBooks } from '@/api/books';
+
+const fetchBooks = async () => {
+  try {
+    const response = await getBooks({
+      page: 1,
+      limit: 10,
+      search: 'Harry Potter',
+      orderByTitle: 'asc',
+      orderByPublishDate: 'desc',
+      condition: 'NEW'
+    });
+    
+    console.log(response.data); // Array of books
+    console.log(response.meta); // { page, limit, prev_page, next_page }
+  } catch (error) {
+    console.error('Failed to fetch books:', error);
+  }
+};
+```
+
+#### **Get Book by ID**
+```typescript
+import { getBookById } from '@/api/books';
+
+const fetchBookDetail = async (bookId: string) => {
+  try {
+    const response = await getBookById(bookId);
+    console.log(response.data); // Book detail
+  } catch (error) {
+    console.error('Failed to fetch book:', error);
+  }
+};
+```
+
+#### **Create Book**
+```typescript
+import { createBook } from '@/api/books';
+
+const handleCreateBook = async () => {
+  try {
+    const response = await createBook({
+      title: 'New Book Title',
+      writer: 'Author Name',
+      publisher: 'Publisher Name',
+      description: 'Book description',
+      publication_year: 2025,
+      price: 50000,
+      stock_quantity: 100,
+      genre_id: 'genre-uuid-here',
+      isbn: 'ISBN123456', // optional
+      condition: 'NEW' // optional
+    });
+    
+    console.log(response.data); // { id, title, created_at }
+  } catch (error) {
+    console.error('Failed to create book:', error);
+  }
+};
+```
+
+#### **Update Book**
+```typescript
+import { updateBook } from '@/api/books';
+
+const handleUpdateBook = async (bookId: string) => {
+  try {
+    // Hanya bisa update: description, price, stock_quantity
+    const response = await updateBook(bookId, {
+      description: 'Updated description',
+      price: 60000,
+      stock_quantity: 80
+    });
+    
+    console.log(response.data);
+  } catch (error) {
+    console.error('Failed to update book:', error);
+  }
+};
+```
+
+#### **Delete Book**
+```typescript
+import { deleteBook } from '@/api/books';
+
+const handleDeleteBook = async (bookId: string) => {
+  try {
+    const response = await deleteBook(bookId);
+    console.log(response.message); // "Book removed successfully"
+  } catch (error) {
+    console.error('Failed to delete book:', error);
+  }
+};
+```
+
+#### **Get Books by Genre**
+```typescript
+import { getBooksByGenre } from '@/api/books';
+
+const fetchBooksByGenre = async (genreId: string) => {
+  try {
+    const response = await getBooksByGenre(genreId, {
+      page: 1,
+      limit: 10,
+      search: 'fantasy',
+      orderByTitle: 'asc'
+    });
+    
+    console.log(response.data); // Books in that genre
+  } catch (error) {
+    console.error('Failed to fetch books by genre:', error);
+  }
+};
+```
+
+---
+
+### **3. Genres APIs** (`src/api/genres.ts`)
+
+#### **Get All Genres**
+```typescript
+import { getGenres } from '@/api/genres';
+
+const fetchGenres = async () => {
+  try {
+    const response = await getGenres({
+      page: 1,
+      limit: 10,
+      search: 'fiction',
+      orderByName: 'asc'
+    });
+    
+    console.log(response.data); // Array of genres
+    
+    // Untuk dropdown, biasanya fetch all tanpa pagination
+    const allGenres = await getGenres(); // tanpa params
+    console.log(allGenres.data);
+  } catch (error) {
+    console.error('Failed to fetch genres:', error);
+  }
+};
+```
+
+#### **Get Genre by ID**
+```typescript
+import { getGenreById } from '@/api/genres';
+
+const fetchGenreDetail = async (genreId: string) => {
+  try {
+    const response = await getGenreById(genreId);
+    console.log(response.data); // { id, name }
+  } catch (error) {
+    console.error('Failed to fetch genre:', error);
+  }
+};
+```
+
+#### **Create Genre**
+```typescript
+import { createGenre } from '@/api/genres';
+
+const handleCreateGenre = async () => {
+  try {
+    const response = await createGenre({
+      name: 'Science Fiction'
+    });
+    
+    console.log(response.data); // { id, name, created_at }
+  } catch (error) {
+    console.error('Failed to create genre:', error);
+  }
+};
+```
+
+---
+
+### **4. Transactions APIs** (`src/api/transactions.ts`)
+
+#### **Create Transaction (Checkout)**
+```typescript
+import { createTransaction } from '@/api/transactions';
+
+const handleCheckout = async (userId: string) => {
+  try {
+    const response = await createTransaction({
+      user_id: userId,
+      items: [
+        { book_id: 'book-uuid-1', quantity: 2 },
+        { book_id: 'book-uuid-2', quantity: 1 },
+        { book_id: 'book-uuid-3', quantity: 5 }
+      ]
+    });
+    
+    console.log(response.data); 
+    // { transaction_id, total_quantity, total_price }
+  } catch (error) {
+    console.error('Failed to create transaction:', error);
+  }
+};
+```
+
+#### **Get All Transactions**
+```typescript
+import { getTransactions } from '@/api/transactions';
+
+const fetchTransactions = async () => {
+  try {
+    const response = await getTransactions({
+      page: 1,
+      limit: 10,
+      search: 'transaction-id', // search by ID
+      orderById: 'desc',
+      orderByAmount: 'asc',
+      orderByPrice: 'desc'
+    });
+    
+    console.log(response.data); // Array of transactions
+    console.log(response.meta); // Pagination info
+  } catch (error) {
+    console.error('Failed to fetch transactions:', error);
+  }
+};
+```
+
+#### **Get Transaction by ID**
+```typescript
+import { getTransactionById } from '@/api/transactions';
+
+const fetchTransactionDetail = async (transactionId: string) => {
+  try {
+    const response = await getTransactionById(transactionId);
+    console.log(response.data); 
+    // { id, items: [{ book_id, book_title, quantity, subtotal_price }], 
+    //   total_quantity, total_price }
+  } catch (error) {
+    console.error('Failed to fetch transaction:', error);
+  }
+};
+```
+
+#### **Get Transaction Statistics**
+```typescript
+import { getTransactionStatistics } from '@/api/transactions';
+
+const fetchStatistics = async () => {
+  try {
+    const response = await getTransactionStatistics();
+    console.log(response.data);
+    // { total_transactions, average_transaction_amount, 
+    //   fewest_book_sales_genre, most_book_sales_genre }
+  } catch (error) {
+    console.error('Failed to fetch statistics:', error);
+  }
+};
+```
+
+---
+
+### **5. Contoh Penggunaan di React Component**
+
+#### **Dengan useState & useEffect**
+```typescript
+import { useState, useEffect } from 'react';
+import { getBooks } from '@/api/books';
+
+const BookListPage = () => {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      setError('');
+      
+      try {
+        const response = await getBooks({ page, limit: 10 });
+        setBooks(response.data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch books');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, [page]);
+
+  if (loading) return <Loader />;
+  if (error) return <ErrorMessage message={error} />;
+  if (books.length === 0) return <EmptyState message="No books found" />;
+
+  return (
+    <div>
+      {books.map(book => (
+        <BookCard key={book.id} book={book} />
+      ))}
+    </div>
+  );
+};
+```
+
+#### **Dengan Async/Await di Event Handler**
+```typescript
+import { useState } from 'react';
+import { login } from '@/api/auth';
+import { saveToken } from '@/utils/token';
+import { useNavigate } from 'react-router-dom';
+
+const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await login({ email, password });
+      saveToken(response.data.access_token);
+      navigate('/books');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+    </form>
+  );
+};
+```
+
+---
+
+### **6. Error Handling Best Practices**
+
+```typescript
+import { getBooks } from '@/api/books';
+
+const fetchBooks = async () => {
+  try {
+    const response = await getBooks();
+    return response.data;
+  } catch (error: any) {
+    // Handle different error types
+    if (error.response) {
+      // Server responded with error
+      console.error('API Error:', error.response.data.message);
+      throw new Error(error.response.data.message);
+    } else if (error.request) {
+      // Request made but no response
+      console.error('Network Error:', error.request);
+      throw new Error('Network error. Please check your connection.');
+    } else {
+      // Something else happened
+      console.error('Error:', error.message);
+      throw new Error('An unexpected error occurred.');
+    }
+  }
+};
+```
+
+---
+
+### **7. Tips Penting**
+
+1. **Import Path Alias**: Gunakan `@/api` jika sudah setup path alias di `tsconfig.json`:
+   ```json
+   {
+     "compilerOptions": {
+       "paths": {
+         "@/*": ["./src/*"]
+       }
+     }
+   }
+   ```
+
+2. **Token Authentication**: Token otomatis ditambahkan ke header oleh `axiosInstance` interceptor, jadi tidak perlu manual set header di setiap request.
+
+3. **Type Safety**: Semua API functions sudah memiliki TypeScript types yang jelas. Gunakan autocomplete IDE untuk melihat parameter dan return types.
+
+4. **Error Handling**: Selalu gunakan try-catch untuk handle error dari API calls.
+
+5. **Loading States**: Tampilkan loading indicator saat API request sedang berjalan.
+
+6. **Response Structure**: Semua response dari API memiliki struktur:
+   ```typescript
+   {
+     success: boolean,
+     message: string,
+     data: any,
+     meta?: { page, limit, prev_page, next_page } // untuk pagination
+   }
+   ```
+
+---
+
 ## ✨ Good Luck, Team!
 
 **Dimas, Arul, Danar - semangat ngoding! 🚀**
