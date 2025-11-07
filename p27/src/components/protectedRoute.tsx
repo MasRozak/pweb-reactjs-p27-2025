@@ -1,15 +1,18 @@
-import React from 'react';
+// src/components/protectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; 
+import { useAuth } from '../contexts/authContext';
 
-const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated } = useAuth(); // Ambil dari context
+const ProtectedRoute = () => {
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />; // Tendang ke /login
+    // Task: Redirect ke /login jika belum login
+    // `replace` mengganti history agar user tidak bisa back ke halaman protected
+    return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />; 
+  // Render halaman (child route) jika sudah terautentikasi
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
