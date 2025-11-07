@@ -1,10 +1,11 @@
-import React from 'react';
+// src/components/protectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext';
 
-const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated } = useAuth(); // Ambil dari context
+const ProtectedRoute = () => {
+  const { isAuthenticated } = useAuth();
 
+<<<<<<< HEAD
   // TEMPORARY: Bypass auth for testing (remove when login is ready)
   // Set fake token in console: localStorage.setItem('token', 'test-token')
   const hasToken = localStorage.getItem('token');
@@ -40,6 +41,15 @@ const ProtectedRoute: React.FC = () => {
     );
   }
 
+=======
+  if (!isAuthenticated) {
+    // Task: Redirect ke /login jika belum login
+    // `replace` mengganti history agar user tidak bisa back ke halaman protected
+    return <Navigate to="/login" replace />;
+  }
+
+  // Render halaman (child route) jika sudah terautentikasi
+>>>>>>> 02d37d444068bc4dec022f061255949a62830006
   return <Outlet />;
 };
 
