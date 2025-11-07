@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Project-specific exclusions
+docs/**/*.md
+!docs/brief.md
+*.notes.md
+.claude/
+notes/
+**/.DS_Store

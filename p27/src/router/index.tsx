@@ -7,9 +7,9 @@ import ProtectedRoute from '../components/protectedRoute';
 // import DetailBook from '../pages/bookPages/detailBook';
 // import AddBook from '../pages/bookPages/addBook';
 // import DeleteBook from '../pages/bookPages/deleteBook';
-// import ListTransactions from '../pages/transactionPages/listTransactions';
-// import DetailTransaction from '../pages/transactionPages/detailTransaction';
-// import CreateTransaction from '../pages/transactionPages/createTransaction';
+import ListTransactions from '../pages/transactionPages/listTransactions';
+import DetailTransaction from '../pages/transactionPages/detailTransaction';
+import CreateTransaction from '../pages/transactionPages/createTransaction';
 
 export const router = createBrowserRouter([
 //   // Rute Publik
@@ -24,9 +24,9 @@ export const router = createBrowserRouter([
     //   { path: '/books/:id', element: <DetailBook /> },
     //   { path: '/books/add', element: <AddBook /> },
     //   { path: '/books/delete', element: <DeleteBook /> },
-    //   { path: '/transactions', element: <ListTransactions /> },
-    //   { path: '/transactions/:id', element: <DetailTransaction /> },
-    //   { path: '/transactions/add', element: <CreateTransaction /> },
+      { path: '/transactions', element: <ListTransactions /> },
+      { path: '/transactions/:id', element: <DetailTransaction /> },
+      { path: '/transactions/add', element: <CreateTransaction /> },
     ]
   }
 ]);
