@@ -1,9 +1,20 @@
 // src/pages/transactionPages/createTransaction.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBooks } from '../../api/books';
-import { createTransaction } from '../../api/transactions';
-import { Book } from '../../types/book.types';
+import axiosInstance from '../../api/axiosInstance';
+
+// Types matching the actual API structure
+interface Book {
+  id: string;
+  title: string;
+  writer: string;
+  publisher: string;
+  description?: string;
+  publication_year?: number;
+  price: number;
+  stock_quantity: number;
+  genre: string;
+}
 
 interface CartItem {
   book: Book;
@@ -27,8 +38,8 @@ const CreateTransaction: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getBooks({ limit: 100 });
-      setBooks(response.data || []);
+      const response = await axiosInstance.get('/books', { params: { limit: 100 } });
+      setBooks(response.data.data || []);
     } catch (err) {
       setError('Failed to load books. Please try again.');
       console.error('Error loading books:', err);
@@ -40,27 +51,25 @@ const CreateTransaction: React.FC = () => {
   const handleAddToCart = (book: Book) => {
     const existingItem = cart.find(item => item.book.id === book.id);
     if (existingItem) {
-      // Already in cart, just increment quantity
       updateQuantity(book.id, existingItem.quantity + 1);
     } else {
-      // Add new item to cart
       setCart([...cart, { book, quantity: 1 }]);
     }
   };
 
-  const handleRemoveFromCart = (bookId: number) => {
+  const handleRemoveFromCart = (bookId: string) => {
     setCart(cart.filter(item => item.book.id !== bookId));
   };
 
-  const updateQuantity = (bookId: number, newQuantity: number) => {
+  const updateQuantity = (bookId: string, newQuantity: number) => {
     if (newQuantity < 1) {
       handleRemoveFromCart(bookId);
       return;
     }
 
     const item = cart.find(item => item.book.id === bookId);
-    if (item && newQuantity > item.book.stock) {
-      alert(`Cannot exceed available stock (${item.book.stock})`);
+    if (item && newQuantity > item.book.stock_quantity) {
+      alert(`Cannot exceed available stock (${item.book.stock_quantity})`);
       return;
     }
 
@@ -84,7 +93,6 @@ const CreateTransaction: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
     if (cart.length === 0) {
       alert('Please add at least one book to your cart');
       return;
@@ -92,8 +100,8 @@ const CreateTransaction: React.FC = () => {
 
     // Check stock availability
     for (const item of cart) {
-      if (item.quantity > item.book.stock) {
-        alert(`Insufficient stock for "${item.book.title}". Available: ${item.book.stock}`);
+      if (item.quantity > item.book.stock_quantity) {
+        alert(`Insufficient stock for "${item.book.title}". Available: ${item.book.stock_quantity}`);
         return;
       }
       if (item.quantity < 1) {
@@ -106,18 +114,20 @@ const CreateTransaction: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
+      // TEMPORARY: Using fake user_id (should come from AuthContext)
       const transactionData = {
+        user_id: 'test-user-id',
         items: cart.map(item => ({
           book_id: item.book.id,
           quantity: item.quantity
         }))
       };
 
-      const response = await createTransaction(transactionData);
+      const response = await axiosInstance.post('/transactions', transactionData);
 
-      // Success - redirect to transaction detail or list
-      if (response.data?.id) {
-        navigate(`/transactions/${response.data.id}`);
+      // Navigate to transaction detail on success
+      if (response.data.success && response.data.data?.transaction_id) {
+        navigate(`/transactions/${response.data.data.transaction_id}`);
       } else {
         navigate('/transactions');
       }
@@ -196,23 +206,23 @@ const CreateTransaction: React.FC = () => {
                               <span className="font-semibold text-blue-600">
                                 ${book.price.toLocaleString()}
                               </span>
-                              <span className={`${book.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                Stock: {book.stock}
+                              <span className={`${book.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                Stock: {book.stock_quantity}
                               </span>
                             </div>
                           </div>
                           <button
                             onClick={() => handleAddToCart(book)}
-                            disabled={book.stock === 0 || !!inCart}
+                            disabled={book.stock_quantity === 0 || !!inCart}
                             className={`px-4 py-2 rounded-lg font-medium transition ${
-                              book.stock === 0
+                              book.stock_quantity === 0
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : inCart
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                             }`}
                           >
-                            {book.stock === 0 ? 'Out of Stock' : inCart ? 'In Cart' : 'Add to Cart'}
+                            {book.stock_quantity === 0 ? 'Out of Stock' : inCart ? 'In Cart' : 'Add to Cart'}
                           </button>
                         </div>
                       </div>
@@ -261,11 +271,11 @@ const CreateTransaction: React.FC = () => {
                               onChange={(e) => updateQuantity(item.book.id, parseInt(e.target.value) || 0)}
                               className="w-16 text-center border border-gray-300 rounded py-1"
                               min="1"
-                              max={item.book.stock}
+                              max={item.book.stock_quantity}
                             />
                             <button
                               onClick={() => updateQuantity(item.book.id, item.quantity + 1)}
-                              disabled={item.quantity >= item.book.stock}
+                              disabled={item.quantity >= item.book.stock_quantity}
                               className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               +

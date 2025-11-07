@@ -1,13 +1,31 @@
 // src/pages/transactionPages/detailTransaction.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getTransactionById } from '../../api/transactions';
-import { Transaction } from '../../types/transaction.types';
+import axiosInstance from '../../api/axiosInstance';
+
+// Types matching the actual API structure
+interface TransactionItem {
+  book_id: string;
+  book_title?: string;
+  quantity: number;
+  price?: number;
+  subtotal_price?: number;
+}
+
+interface TransactionDetail {
+  id: string;
+  user_id?: string;
+  user_email?: string;
+  total_quantity: number;
+  total_price: number;
+  created_at: string;
+  items: TransactionItem[];
+}
 
 const DetailTransaction: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const [transaction, setTransaction] = useState<TransactionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,8 +39,8 @@ const DetailTransaction: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getTransactionById(id!);
-      setTransaction(response.data);
+      const response = await axiosInstance.get(`/transactions/${id}`);
+      setTransaction(response.data.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load transaction details. Please try again.');
       console.error('Error loading transaction:', err);
@@ -121,10 +139,12 @@ const DetailTransaction: React.FC = () => {
                   <p className="text-lg font-medium text-gray-900">{transaction.user_email}</p>
                 </div>
               )}
-              <div>
-                <p className="text-sm text-gray-600">User ID</p>
-                <p className="text-lg font-medium text-gray-900">#{transaction.user_id}</p>
-              </div>
+              {transaction.user_id && (
+                <div>
+                  <p className="text-sm text-gray-600">User ID</p>
+                  <p className="text-lg font-medium text-gray-900">#{transaction.user_id}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -132,7 +152,7 @@ const DetailTransaction: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-600">Total Items</p>
-                <p className="text-2xl font-bold text-gray-900">{transaction.total_amount}</p>
+                <p className="text-2xl font-bold text-gray-900">{transaction.total_quantity}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600">Total Price</p>
@@ -185,12 +205,12 @@ const DetailTransaction: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <span className="text-sm text-gray-900">
-                            ${item.price.toLocaleString()}
+                            {item.price ? `$${item.price.toLocaleString()}` : 'N/A'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <span className="text-sm font-semibold text-gray-900">
-                            ${((item.subtotal || (item.price * item.quantity))).toLocaleString()}
+                            ${(item.subtotal_price || 0).toLocaleString()}
                           </span>
                         </td>
                       </tr>
@@ -223,12 +243,14 @@ const DetailTransaction: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <span className="text-gray-600">Price:</span>
-                        <span className="ml-2 font-semibold">${item.price.toLocaleString()}</span>
+                        <span className="ml-2 font-semibold">
+                          {item.price ? `$${item.price.toLocaleString()}` : 'N/A'}
+                        </span>
                       </div>
                       <div className="col-span-2 text-right">
                         <span className="text-gray-600">Subtotal:</span>
                         <span className="ml-2 font-bold text-blue-600">
-                          ${((item.subtotal || (item.price * item.quantity))).toLocaleString()}
+                          ${(item.subtotal_price || 0).toLocaleString()}
                         </span>
                       </div>
                     </div>

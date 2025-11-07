@@ -1,8 +1,15 @@
 // src/pages/transactionPages/listTransactions.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTransactions } from '../../api/transactions';
-import { Transaction } from '../../types/transaction.types';
+import axiosInstance from '../../api/axiosInstance';
+
+// Types matching the actual API structure
+interface Transaction {
+  id: string;
+  total_quantity: number;
+  total_price: number;
+  created_at?: string;
+}
 
 const ListTransactions: React.FC = () => {
   const navigate = useNavigate();
@@ -13,7 +20,7 @@ const ListTransactions: React.FC = () => {
 
   // Filters and sorting
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'id' | 'total_amount' | 'total_price'>('id');
+  const [sortBy, setSortBy] = useState<'id' | 'total_quantity' | 'total_price'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Pagination
@@ -32,8 +39,8 @@ const ListTransactions: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getTransactions();
-      setTransactions(response.data || []);
+      const response = await axiosInstance.get('/transactions', { params: { limit: 100 } });
+      setTransactions(response.data.data || []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load transactions. Please try again.');
       console.error('Error loading transactions:', err);
@@ -68,7 +75,7 @@ const ListTransactions: React.FC = () => {
     setCurrentPage(1); // Reset to first page when filters change
   };
 
-  const handleSort = (field: 'id' | 'total_amount' | 'total_price') => {
+  const handleSort = (field: 'id' | 'total_quantity' | 'total_price') => {
     if (sortBy === field) {
       // Toggle order if same field
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -91,7 +98,8 @@ const ListTransactions: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
       year: 'numeric',
@@ -171,14 +179,14 @@ const ListTransactions: React.FC = () => {
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="id">Transaction ID</option>
-                  <option value="total_amount">Total Items</option>
+                  <option value="total_quantity">Total Items</option>
                   <option value="total_price">Total Price</option>
                 </select>
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  {sortOrder === 'asc' ? '‘' : '“'}
+                  {sortOrder === 'asc' ? 'â†‘' : 'â†“'}
                 </button>
               </div>
             </div>
@@ -230,22 +238,22 @@ const ListTransactions: React.FC = () => {
                         onClick={() => handleSort('id')}
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       >
-                        Transaction ID {sortBy === 'id' && (sortOrder === 'asc' ? '‘' : '“')}
+                        Transaction ID {sortBy === 'id' && (sortOrder === 'asc' ? 'â†‘' : 'â†“')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Date & Time
                       </th>
                       <th
-                        onClick={() => handleSort('total_amount')}
+                        onClick={() => handleSort('total_quantity')}
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       >
-                        Total Items {sortBy === 'total_amount' && (sortOrder === 'asc' ? '‘' : '“')}
+                        Total Items {sortBy === 'total_quantity' && (sortOrder === 'asc' ? 'â†‘' : 'â†“')}
                       </th>
                       <th
                         onClick={() => handleSort('total_price')}
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       >
-                        Total Price {sortBy === 'total_price' && (sortOrder === 'asc' ? '‘' : '“')}
+                        Total Price {sortBy === 'total_price' && (sortOrder === 'asc' ? 'â†‘' : 'â†“')}
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -266,7 +274,7 @@ const ListTransactions: React.FC = () => {
                           {formatDate(transaction.created_at)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {transaction.total_amount} items
+                          {transaction.total_quantity} items
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
                           ${transaction.total_price.toLocaleString()}
@@ -308,7 +316,7 @@ const ListTransactions: React.FC = () => {
                       {formatDate(transaction.created_at)}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {transaction.total_amount} items
+                      {transaction.total_quantity} items
                     </div>
                   </div>
                 ))}

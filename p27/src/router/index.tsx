@@ -1,5 +1,5 @@
 // src/router/index.tsx
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/protectedRoute';
 // import LoginPage from '../pages/authPages/loginPage';
 // import RegisterPage from '../pages/authPages/registerPage';
@@ -12,6 +12,12 @@ import DetailTransaction from '../pages/transactionPages/detailTransaction';
 import CreateTransaction from '../pages/transactionPages/createTransaction';
 
 export const router = createBrowserRouter([
+  // Root redirect to transactions
+  {
+    path: '/',
+    element: <Navigate to="/transactions" replace />
+  },
+
 //   // Rute Publik
 //   { path: '/login', element: <LoginPage /> },
 //   { path: '/register', element: <RegisterPage /> },
