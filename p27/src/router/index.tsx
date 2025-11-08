@@ -7,9 +7,9 @@ import BookList from '../pages/bookPages/bookList';
 import DetailBook from '../pages/bookPages/detailBook';
 import AddBook from '../pages/bookPages/addBook';
 import TestAPI from '../pages/bookPages/testAPI';
-// import ListTransactions from '../pages/transactionPages/listTransactions';
-// import DetailTransaction from '../pages/transactionPages/detailTransaction';
-// import CreateTransaction from '../pages/transactionPages/createTransaction';
+import ListTransactions from '../pages/transactionPages/listTransactions';
+import DetailTransaction from '../pages/transactionPages/detailTransaction';
+import CreateTransaction from '../pages/transactionPages/createTransaction';
 
 export const router = createBrowserRouter([
   // Root redirect to books
@@ -30,9 +30,9 @@ export const router = createBrowserRouter([
       { path: '/books', element: <BookList /> },
       { path: '/books/add', element: <AddBook /> },
       { path: '/books/:id', element: <DetailBook /> },
-      // { path: '/transactions', element: <ListTransactions /> },
-      // { path: '/transactions/:id', element: <DetailTransaction /> },
-      // { path: '/transactions/add', element: <CreateTransaction /> },
+      { path: '/transactions', element: <ListTransactions /> },
+      { path: '/transactions/:id', element: <DetailTransaction /> },
+      { path: '/transactions/add', element: <CreateTransaction /> },
     ]
   }
 ]);

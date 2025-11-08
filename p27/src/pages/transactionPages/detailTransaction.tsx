@@ -1,5 +1,5 @@
 // src/pages/transactionPages/detailTransaction.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
 
@@ -29,13 +29,7 @@ const DetailTransaction: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      loadTransaction();
-    }
-  }, [id]);
-
-  const loadTransaction = async () => {
+  const loadTransaction = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -47,7 +41,13 @@ const DetailTransaction: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      loadTransaction();
+    }
+  }, [id, loadTransaction]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

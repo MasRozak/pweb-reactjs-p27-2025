@@ -1,40 +1,8 @@
 // src/api/transactions.ts
 import axiosInstance from './axiosInstance';
+import type { Transaction, CreateTransactionRequest } from '../types/transaction.types';
 
-interface TransactionItem {
-  book_id: string;
-  quantity: number;
-}
-
-interface TransactionItemDetail extends TransactionItem {
-  book_title?: string;
-  subtotal_price?: number;
-}
-
-interface Transaction {
-  id: string;
-  total_quantity: number;
-  total_price: number;
-}
-
-interface TransactionDetail extends Transaction {
-  items: TransactionItemDetail[];
-}
-
-interface CreateTransactionData {
-  user_id: string;
-  items: TransactionItem[];
-}
-
-interface GetTransactionsParams {
-  page?: number;
-  limit?: number;
-  search?: string; // search by transaction ID
-  orderById?: 'asc' | 'desc';
-  orderByAmount?: 'asc' | 'desc';
-  orderByPrice?: 'asc' | 'desc';
-}
-
+// API Response interfaces
 interface TransactionsResponse {
   success: boolean;
   message: string;
@@ -50,7 +18,7 @@ interface TransactionsResponse {
 interface TransactionResponse {
   success: boolean;
   message: string;
-  data: TransactionDetail;
+  data: Transaction;
 }
 
 interface CreateTransactionResponse {
@@ -76,12 +44,20 @@ interface TransactionStatisticsResponse {
   data: TransactionStatistics;
 }
 
+interface GetTransactionsParams {
+  page?: number;
+  limit?: number;
+  search?: string; // search by transaction ID
+  sortBy?: 'id' | 'total_amount' | 'total_price';
+  order?: 'asc' | 'desc';
+}
+
 /**
  * Create new transaction
  * POST /transactions
  */
 export const createTransaction = async (
-  data: CreateTransactionData
+  data: CreateTransactionRequest & { user_id: string }
 ): Promise<CreateTransactionResponse> => {
   const response = await axiosInstance.post('/transactions', data);
   return response.data;

@@ -12,10 +12,9 @@ import DetailBook from './pages/bookPages/detailBook';
 import AddBook from './pages/bookPages/addBook';
 import TestAPI from './pages/bookPages/testAPI';
 
-// Import halaman Transactions
-// import ListTransactions from './pages/transactionPages/listTransactions';
-// import DetailTransaction from './pages/transactionPages/detailTransaction';
-// import CreateTransaction from './pages/transactionPages/createTransaction';
+import ListTransactions from './pages/transactionPages/listTransactions';
+import DetailTransaction from './pages/transactionPages/detailTransaction';
+import CreateTransaction from './pages/transactionPages/createTransaction';
 
 const App = () => {
   return (
@@ -32,9 +31,9 @@ const App = () => {
           <Route path="/books" element={<BookList />} />
           <Route path="/books/add" element={<AddBook />} />
           <Route path="/books/:id" element={<DetailBook />} />
-          {/* <Route path="/transactions" element={<ListTransactions />} /> */}
-          {/* <Route path="/transactions/:id" element={<DetailTransaction />} /> */}
-          {/* <Route path="/transactions/add" element={<CreateTransaction />} /> */}
+          {<Route path="/transactions" element={<ListTransactions />} />}
+          {<Route path="/transactions/:id" element={<DetailTransaction />} />}
+          {<Route path="/transactions/add" element={<CreateTransaction />} />}
         </Route>
 
         {/* Halaman 404 */}

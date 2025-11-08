@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
+import { useAuth } from '../../contexts/authContext';
 
 // Types matching the actual API structure
 interface Book {
@@ -23,6 +24,7 @@ interface CartItem {
 
 const CreateTransaction: React.FC = () => {
   const navigate = useNavigate();
+  const { userId } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,9 +116,14 @@ const CreateTransaction: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
-      // TEMPORARY: Using fake user_id (should come from AuthContext)
+      // Get user_id from AuthContext
+      if (!userId) {
+        setError('User not authenticated. Please log in again.');
+        return;
+      }
+
       const transactionData = {
-        user_id: 'test-user-id',
+        user_id: userId,
         items: cart.map(item => ({
           book_id: item.book.id,
           quantity: item.quantity
@@ -124,6 +131,11 @@ const CreateTransaction: React.FC = () => {
       };
 
       const response = await axiosInstance.post('/transactions', transactionData);
+
+      // Show success notification
+      if (response.data.success) {
+        alert(`Transaction created successfully! Transaction ID: ${response.data.data?.transaction_id || 'N/A'}`);
+      }
 
       // Navigate to transaction detail on success
       if (response.data.success && response.data.data?.transaction_id) {
