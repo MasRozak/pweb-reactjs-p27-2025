@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext';
+import { useCart } from '../contexts/cartContext';
 
 const Navbar = () => {
   const { isAuthenticated, userEmail, logout } = useAuth();
+  const { cartCount } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // --- Style untuk NavLink (dibuat lebih modern & subtle) ---
@@ -83,12 +85,38 @@ const Navbar = () => {
         {/* Ini adalah perbaikan utama: menggabungkan link dan info user dalam satu div */}
         {isAuthenticated && (
           <div className="hidden md:flex items-center space-x-4">
-            
+
             {/* Nav Links */}
             <ul className="flex flex-row space-x-1 font-medium">
               {renderNavLinks(false)} {/* 'false' berarti ini untuk desktop */}
             </ul>
-            
+
+            {/* Cart Icon with Badge */}
+            <Link
+              to="/transactions/add"
+              className="relative p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+              title="Shopping Cart"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
             {/* Info User & Logout (dengan pemisah) */}
             <div className="flex items-center space-x-4 pl-4 border-l border-gray-300">
               <span className="text-sm text-gray-600">{userEmail}</span>
@@ -111,7 +139,38 @@ const Navbar = () => {
           <div className="w-full md:hidden" id="mobile-menu">
             <ul className="flex flex-col mt-4 pt-4 border-t border-gray-200">
               {renderNavLinks(true)} {/* 'true' berarti ini untuk mobile */}
-              
+
+              {/* Cart Link (Mobile) */}
+              <li>
+                <Link
+                  to="/transactions/add"
+                  className="flex items-center justify-between py-2 px-3 rounded text-gray-600 hover:text-blue-700 hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    Cart
+                  </span>
+                  {cartCount > 0 && (
+                    <span className="bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </li>
+
               {/* Info User & Logout (Mobile) */}
               <li className="pt-4 mt-4 border-t border-gray-100">
                 <span className="block py-2 px-3 text-sm text-gray-600">{userEmail}</span>

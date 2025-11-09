@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
 import { useAuth } from '../../contexts/authContext';
+import { useCart } from '../../contexts/cartContext';
 
 // Types matching the actual API structure
 interface Book {
@@ -25,8 +26,8 @@ interface CartItem {
 const CreateTransaction: React.FC = () => {
   const navigate = useNavigate();
   const { userId } = useAuth();
+  const { cart, totalPrice, updateQuantity, removeFromCart, clearCart, addToCart } = useCart();
   const [books, setBooks] = useState<Book[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,41 +52,33 @@ const CreateTransaction: React.FC = () => {
   };
 
   const handleAddToCart = (book: Book) => {
-    const existingItem = cart.find(item => item.book.id === book.id);
-    if (existingItem) {
-      updateQuantity(book.id, existingItem.quantity + 1);
-    } else {
-      setCart([...cart, { book, quantity: 1 }]);
-    }
-  };
-
-  const handleRemoveFromCart = (bookId: string) => {
-    setCart(cart.filter(item => item.book.id !== bookId));
-  };
-
-  const updateQuantity = (bookId: string, newQuantity: number) => {
-    if (newQuantity < 1) {
-      handleRemoveFromCart(bookId);
+    if (book.stock_quantity === 0) {
+      alert('Book is out of stock!');
       return;
     }
 
-    const item = cart.find(item => item.book.id === bookId);
-    if (item && newQuantity > item.book.stock_quantity) {
-      alert(`Cannot exceed available stock (${item.book.stock_quantity})`);
+    addToCart({
+      id: book.id,
+      title: book.title,
+      writer: book.writer,
+      price: book.price,
+      stock_quantity: book.stock_quantity,
+    });
+
+    alert(`"${book.title}" added to cart!`);
+  };
+
+  const handleUpdateQuantity = (bookId: string, newQuantity: number) => {
+    const item = cart.find(item => item.id === bookId);
+    if (item && newQuantity > item.stock_quantity) {
+      alert(`Cannot exceed available stock (${item.stock_quantity})`);
       return;
     }
-
-    setCart(cart.map(item =>
-      item.book.id === bookId ? { ...item, quantity: newQuantity } : item
-    ));
+    updateQuantity(bookId, newQuantity);
   };
 
-  const calculateSubtotal = (item: CartItem) => {
-    return item.book.price * item.quantity;
-  };
-
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => total + calculateSubtotal(item), 0);
+  const calculateSubtotal = (item: typeof cart[0]) => {
+    return item.price * item.quantity;
   };
 
   const getTotalItems = () => {
@@ -102,8 +95,8 @@ const CreateTransaction: React.FC = () => {
 
     // Check stock availability
     for (const item of cart) {
-      if (item.quantity > item.book.stock_quantity) {
-        alert(`Insufficient stock for "${item.book.title}". Available: ${item.book.stock_quantity}`);
+      if (item.quantity > item.stock_quantity) {
+        alert(`Insufficient stock for "${item.title}". Available: ${item.stock_quantity}`);
         return;
       }
       if (item.quantity < 1) {
@@ -125,16 +118,17 @@ const CreateTransaction: React.FC = () => {
       const transactionData = {
         user_id: userId,
         items: cart.map(item => ({
-          book_id: item.book.id,
+          book_id: item.id,
           quantity: item.quantity
         }))
       };
 
       const response = await axiosInstance.post('/transactions', transactionData);
 
-      // Show success notification
+      // Show success notification and clear cart
       if (response.data.success) {
         alert(`Transaction created successfully! Transaction ID: ${response.data.data?.transaction_id || 'N/A'}`);
+        clearCart(); // Clear cart after successful transaction
       }
 
       // Navigate to transaction detail on success
@@ -204,7 +198,7 @@ const CreateTransaction: React.FC = () => {
                   <p className="text-center text-gray-500 py-8">No books found</p>
                 ) : (
                   filteredBooks.map(book => {
-                    const inCart = cart.find(item => item.book.id === book.id);
+                    const inCart = cart.find(item => item.id === book.id);
                     return (
                       <div
                         key={book.id}
@@ -256,14 +250,14 @@ const CreateTransaction: React.FC = () => {
                 <>
                   <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto">
                     {cart.map(item => (
-                      <div key={item.book.id} className="border-b border-gray-200 pb-4">
+                      <div key={item.id} className="border-b border-gray-200 pb-4">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex-1 pr-2">
-                            <h4 className="font-medium text-sm">{item.book.title}</h4>
-                            <p className="text-xs text-gray-600">${item.book.price}</p>
+                            <h4 className="font-medium text-sm">{item.title}</h4>
+                            <p className="text-xs text-gray-600">${item.price}</p>
                           </div>
                           <button
-                            onClick={() => handleRemoveFromCart(item.book.id)}
+                            onClick={() => removeFromCart(item.id)}
                             className="text-red-600 hover:text-red-800 text-sm"
                           >
                             Remove
@@ -272,7 +266,7 @@ const CreateTransaction: React.FC = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => updateQuantity(item.book.id, item.quantity - 1)}
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                               className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-100"
                             >
                               -
@@ -280,14 +274,14 @@ const CreateTransaction: React.FC = () => {
                             <input
                               type="number"
                               value={item.quantity}
-                              onChange={(e) => updateQuantity(item.book.id, parseInt(e.target.value) || 0)}
+                              onChange={(e) => handleUpdateQuantity(item.id, parseInt(e.target.value) || 0)}
                               className="w-16 text-center border border-gray-300 rounded py-1"
                               min="1"
-                              max={item.book.stock_quantity}
+                              max={item.stock_quantity}
                             />
                             <button
-                              onClick={() => updateQuantity(item.book.id, item.quantity + 1)}
-                              disabled={item.quantity >= item.book.stock_quantity}
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= item.stock_quantity}
                               className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               +
@@ -308,7 +302,7 @@ const CreateTransaction: React.FC = () => {
                     </div>
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total Price:</span>
-                      <span className="text-blue-600">${calculateTotal().toLocaleString()}</span>
+                      <span className="text-blue-600">${totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
 

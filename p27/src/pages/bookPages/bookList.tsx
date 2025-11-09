@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getBooks } from '../../api/books';
+import { useCart } from '../../contexts/cartContext';
 import Navbar from '../../components/navbar';
 import Loader from '../../components/Loader';
 import ErrorMessage from '../../components/ErrorMessage';
@@ -27,6 +28,7 @@ interface Meta {
 }
 
 const BookList = () => {
+  const { addToCart, isInCart } = useCart();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +137,23 @@ const BookList = () => {
   const formatCondition = (condition?: string) => {
     if (!condition) return '-';
     return condition.replace(/_/g, ' ');
+  };
+
+  const handleAddToCart = (book: Book) => {
+    if (book.stock_quantity === 0) {
+      alert('Book is out of stock!');
+      return;
+    }
+
+    addToCart({
+      id: book.id,
+      title: book.title,
+      writer: book.writer,
+      price: book.price,
+      stock_quantity: book.stock_quantity,
+    });
+
+    alert(`"${book.title}" added to cart!`);
   };
 
   return (
@@ -314,12 +333,48 @@ const BookList = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <Link
-                            to={`/books/${book.id}`}
-                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
-                          >
-                            Detail
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleAddToCart(book)}
+                              disabled={book.stock_quantity === 0 || isInCart(book.id)}
+                              className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md ${
+                                book.stock_quantity === 0
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : isInCart(book.id)
+                                  ? 'bg-green-600 text-white cursor-default'
+                                  : 'bg-orange-600 text-white hover:bg-orange-700'
+                              }`}
+                              title={
+                                book.stock_quantity === 0
+                                  ? 'Out of stock'
+                                  : isInCart(book.id)
+                                  ? 'Already in cart'
+                                  : 'Add to cart'
+                              }
+                            >
+                              {isInCart(book.id) ? (
+                                <>
+                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                  In Cart
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                  </svg>
+                                  Add
+                                </>
+                              )}
+                            </button>
+                            <Link
+                              to={`/books/${book.id}`}
+                              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
+                            >
+                              Detail
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     ))}
