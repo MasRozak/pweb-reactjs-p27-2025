@@ -70,24 +70,24 @@ Peningkatan UX untuk memastikan aplikasi berjalan mulus:
 
 | Halaman Login | Halaman Register |
 | :---: | :---: |
-| [!Ganti ini dengan screenshot Halaman Login Anda](https://via.placeholder.com/400x300.png?text=Screenshot+Login) | [!Ganti ini dengan screenshot Halaman Register Anda](https://via.placeholder.com/400x300.png?text=Screenshot+Register) |
+| ![](assets/login.png) | ![](assets/register.png) |
 
 | Navbar (Setelah Login) |
 | :---: |
-| [!Ganti ini dengan screenshot Navbar yang menampilkan email user & Tombol Logout](https://via.placeholder.com/800x100.png?text=Screenshot+Navbar+Setelah+Login) |
+| ![Ganti ini dengan screenshot Navbar yang menampilkan email user & Tombol Logout](assets/navbar.png) |
 
 ### 2. Manajemen Buku
 
 | Daftar Buku (Filter & Search) | Detail Buku |
 | :---: | :---: |
-| [!Ganti ini dengan screenshot Halaman Daftar Buku](https://via.placeholder.com/400x300.png?text=Screenshot+Daftar+Buku) | [!Ganti ini dengan screenshot Halaman Detail Buku](https://via.placeholder.com/400x300.png?text=Screenshot+Detail+Buku) |
+| ![Ganti ini dengan screenshot Halaman Daftar Buku](assets/listbook.png) | ![Ganti ini dengan screenshot Halaman Detail Buku](assets/detailbook.png) |
 
 | Form Tambah Buku |
 | :---: |
-| [!Ganti ini dengan screenshot Halaman Tambah Buku](https://via.placeholder.com/400x300.png?text=Screenshot+Form+Tambah+Buku) |
+| ![Ganti ini dengan screenshot Halaman Tambah Buku](assets/addbook.png) |
 
 ### 3. Transaksi
 
 | Halaman Buat Transaksi (Cart/Checkout) | Riwayat Transaksi (My Transactions) |
 | :---: | :---: |
-| [!Ganti ini dengan screenshot Halaman Buat Transaksi](https://via.placeholder.com/400x300.png?text=Screenshot+Buat+Transaksi) | [!Ganti ini dengan screenshot Halaman Riwayat Transaksi](https://via.placeholder.com/400x300.png?text=Screenshot+Riwayat+Transaksi) |
+| ![Ganti ini dengan screenshot Halaman Buat Transaksi](assets/transaction.png) | ![Ganti ini dengan screenshot Halaman Riwayat Transaksi](assets/mytransaction.png) |
