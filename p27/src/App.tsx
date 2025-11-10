@@ -31,9 +31,9 @@ const App = () => {
           <Route path="/books" element={<BookList />} />
           <Route path="/books/add" element={<AddBook />} />
           <Route path="/books/:id" element={<DetailBook />} />
-          {<Route path="/transactions" element={<ListTransactions />} />}
-          {<Route path="/transactions/:id" element={<DetailTransaction />} />}
-          {<Route path="/transactions/add" element={<CreateTransaction />} />}
+          <Route path="/transactions" element={<ListTransactions />} />
+          <Route path="/transactions/:id" element={<DetailTransaction />} />
+          <Route path="/transactions/add" element={<CreateTransaction />} />
         </Route>
 
         {/* Halaman 404 */}

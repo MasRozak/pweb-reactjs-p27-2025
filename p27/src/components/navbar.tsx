@@ -18,7 +18,7 @@ const Navbar = () => {
       <li>
         <NavLink
           to="/books"
-          className={({ isActive }) => 
+          className={({ isActive }) =>
             `block py-2 px-3 rounded ${isActive ? activeClassName : defaultClassName}`
           }
           // Tambahan: tutup menu mobile saat link diklik
@@ -27,28 +27,17 @@ const Navbar = () => {
           Books
         </NavLink>
       </li>
-      {/* <li>
-        <NavLink
-          to="/transactions"
-          className={({ isActive }) => 
-            `block py-2 px-3 rounded ${isActive ? activeClassName : defaultClassName}`
-          }
-          onClick={() => isMobile && setIsMobileMenuOpen(false)}
-        >
-          Transactions
-        </NavLink>
-      </li>
       <li>
         <NavLink
-          to="/test-api"
-          className={({ isActive }) => 
+          to="/transactions"
+          className={({ isActive }) =>
             `block py-2 px-3 rounded ${isActive ? activeClassName : defaultClassName}`
           }
           onClick={() => isMobile && setIsMobileMenuOpen(false)}
         >
-          Test API
+          My Transactions
         </NavLink>
-      </li> */}
+      </li>
     </>
   );
 
